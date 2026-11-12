@@ -5,6 +5,7 @@
   - [Part2: Expose microervice app through Istio gateway via secure HTTPS access](#part2-expose-microervice-app-through-istio-gateway-via-secure-https-access)
   - [Part3: Validated Istio mTLS traffic and configured PeerAuthentication](#part3-validated-istio-mtls-traffic-and-configured-peerauthentication)
   - [Part4: Define Authorization Policies on workloads](#part4-define-authorization-policies-on-workloads)
+- [Module 20: Compliance as Code](#module-20-compliance-as-code)
 
 # Module 18: 
 
@@ -29,6 +30,7 @@
 - Configured traffic routing in cluster via Istio gateway.
   - At first we test with HTTP(80) before enabling HTTPS.
   - Generated a self-signed certificate useing `openssl` for TLS communication and store it in AWS Secret Manager.
+  `openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:4096 -subj '/CN=onlineboutique.dom.com' -keyout key.pem -out cert.pem`
   - We enabled HTTPS(443) and redirect all HTTP traffic to it.
   - For the TLS certificate and key we use AWS Secret Manager and K8s external secrets.
 - Created a Virtual Service for the frontend application to route traffic through the gateway to the service.
@@ -51,3 +53,7 @@
 - Created a namespace-level policy deployed in `online-boutique` to DENY all incoming traffic originating from the `argocd` namespace.
 - To test the communication we also used a test pod in the cluster:
   - `kubectl run -it --image curlimages/curl -n online-boutique --restart=Never mypod -- sh`
+
+---
+
+# Module 20: Compliance as Code
