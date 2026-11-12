@@ -1,5 +1,6 @@
 
-- [Module 18:](#module-18)
+- [Module 3: Application Vulnarability Scanning](#module-3-application-vulnarability-scanning)
+  - [Part1: Setup GiLab CI pipeline and pre-commit script](#part1-setup-gilab-ci-pipeline-and-pre-commit-script)
 - [Module 19: Service Mesh with Istio](#module-19-service-mesh-with-istio)
   - [Part1: Deployed Istio Service Mesh components in EKS Cluster via our Terraform pipeline](#part1-deployed-istio-service-mesh-components-in-eks-cluster-via-our-terraform-pipeline)
   - [Part2: Expose microervice app through Istio gateway via secure HTTPS access](#part2-expose-microervice-app-through-istio-gateway-via-secure-https-access)
@@ -7,7 +8,84 @@
   - [Part4: Define Authorization Policies on workloads](#part4-define-authorization-policies-on-workloads)
 - [Module 20: Compliance as Code](#module-20-compliance-as-code)
 
-# Module 18: 
+# Module 3: Application Vulnarability Scanning
+
+## Part1: Setup GiLab CI pipeline and pre-commit script
+
+**repo: app_juice_shop**
+
+- We use the OWASP open-source app Juice Shop
+- Created a basic GitLab CI pipeline for the app which runs on a GitLab shared runner
+  - We run Yarn tests, build the image and push to our private docker registry
+  (authentication to registry via GitLab CI variables)
+  - To make the pipeline faster we configure caching for Yarn dependencies
+    - We set the poicy to pull-push for caching -- so it updates when needed
+  - `GitLeak` is the next job in the pipeline which scans for secrets in the repo
+    - We set `allow_failure` to true for now so it doesn't block the pipeline
+    - Save the output `gitleaks.json` as an artifact (will use it latet yo upload it to Defect Dojo) for review
+    - To prevent commiting credentials to the repo we set up a Pre-commit hook
+      - In the `.git/hook` dir we create a `pre-commit` file with the script to run `gitleaks` (we are using a docker image and passing the app code)
+  - `njsscan`is added and configured in the pipeline to SAST checks
+    - We add the flag `--exit-warning` to fail on warnings
+  - `semgrep` is added and configured in the pipeline for additional SAST checks
+    - Again the output is saved as an artifact for review.
+
+```mermaid
+flowchart TD
+    subgraph Local Development
+        Dev([Developer]) --> Commit[git commit]
+        Commit --> PreCommit{Pre-commit Hook\nGitLeaks via Docker}
+        PreCommit -- "Secrets Detected" --> Block[Commit Blocked]
+        PreCommit -- "Clean" --> Push[Push to GitLab]
+    end
+
+    subgraph GitLab CI Pipeline [GitLab Shared Runner]
+        Push --> PipelineStart((Start Pipeline))
+
+        subgraph Stage: Test
+            Cache[(Yarn Cache\nPolicy: pull-push)]
+            Gitleaks[GitLeaks Job]
+            YarnTest[Yarn Tests]
+            Njsscan[njsscan SAST]
+            Semgrep[Semgrep SAST]
+
+            YarnTest -.- Cache
+            
+        end
+
+        subgraph Stage: Build & Release
+            DockerBuild[Build Docker Image]
+            DockerPush[Push Image\nAuth: CI Variables]
+            
+            DockerBuild --> DockerPush
+        end
+
+        %% Pipeline triggers Test stage jobs
+        PipelineStart --> Gitleaks
+        PipelineStart --> YarnTest
+        PipelineStart --> Njsscan
+        PipelineStart --> Semgrep
+
+        %% Build stage waits for all Test stage jobs to complete
+        Njsscan --> DockerBuild
+        Semgrep --> DockerBuild
+        Gitleaks --> DockerBuild
+    end
+
+    %% Artifacts and External Systems
+    DockerPush --> Registry[(Private Docker Registry)]
+
+    %% Styling
+    classDef gitlab fill:#FC6D26,stroke:#E24329,stroke-width:2px,color:white;
+    classDef local fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:white;
+    classDef security fill:#E53935,stroke:#B71C1C,stroke-width:2px,color:white;
+    classDef build fill:#1976D2,stroke:#0D47A1,stroke-width:2px,color:white;
+
+    class Push,PipelineStart gitlab;
+    class Dev,Commit,PreCommit,Block local;
+    class Gitleaks,Njsscan,Semgrep security;
+    class DockerBuild,DockerPush,Registry build;
+```
 
 ---
 
