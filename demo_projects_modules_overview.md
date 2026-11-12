@@ -54,6 +54,56 @@
 - To test the communication we also used a test pod in the cluster:
   - `kubectl run -it --image curlimages/curl -n online-boutique --restart=Never mypod -- sh`
 
+```mermaid
+flowchart TD
+    User([User Request HTTPS 443]) --> NLB
+
+    subgraph AWS VPC
+        NLB[AWS Network Load Balancer\nIngress: 80/443\nEgress: All]
+        
+        subgraph EKS Cluster Nodes
+            NLB -- "NodePort (30000-32767)" --> IGW
+            
+            subgraph istio-system [namespace: istio-system]
+                Istiod[Istiod Control Plane\nWebhook Port: 15017]
+                IGW[Istio Ingress Gateway\nEnvoy Proxy]
+            end
+            
+            subgraph online-boutique [namespace: online-boutique]
+                VS[VirtualService\nRouting Rules]
+                
+                subgraph Pods
+                    FE[Frontend Pod]
+                    Sidecar[Envoy Sidecar]
+                    FE -.- Sidecar
+                end
+            end
+            
+            subgraph argocd [namespace: argocd]
+                Argo[ArgoCD Pods]
+                ArgoSidecar[Envoy Sidecar]
+                Argo -.- ArgoSidecar
+            end
+        end
+    end
+
+    IGW -- "VirtualService routes traffic" --> VS
+    VS -- "STRICT mTLS (PeerAuthentication)" --> Sidecar
+    Istiod -. "Injects Sidecars & Certs" .-> Sidecar
+    Istiod -. "Injects Sidecars & Certs" .-> ArgoSidecar
+    Istiod -. "Injects Sidecars & Certs" .-> IGW
+    
+    ArgoSidecar -- "Blocked by AuthorizationPolicy" --x Sidecar
+
+    classDef aws fill:#FF9900,stroke:#232F3E,stroke-width:2px,color:white;
+    classDef istio fill:#466BB0,stroke:#2b426d,stroke-width:2px,color:white;
+    classDef k8s fill:#326ce5,stroke:#1f438f,stroke-width:2px,color:white;
+    
+    class NLB aws;
+    class Istiod,IGW,Sidecar,ArgoSidecar istio;
+    class VS,FE,Argo k8s;
+  ```
+
 ---
 
 # Module 20: Compliance as Code
