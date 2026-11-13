@@ -717,6 +717,14 @@ rule {
 [repo: online-boutique-gitops](https://gitlab.com/dominikjaro_devsecops_bootcamp/online-boutique-gitops)
 
 **AWS**
+
+- Manually created a secret in AWS Secrets Manager for the cluster.
+- In Terraform we created a AWS IAM Role with permissions that will be Assumed to READ the secret.
+- Created a K8s Service Account which is mapped to the IAM Role for secret access.
+- Added external_secrets in EKS Blueprints addons.
+
+---
+
 # Module 19: Service Mesh with Istio
 
 ## Part1: Deployed Istio Service Mesh components in EKS Cluster via our Terraform pipeline
