@@ -21,10 +21,11 @@
   - [Create AWS resources via IaC (terraform)](#create-aws-resources-via-iac-terraform)
   - [Create a IaC pipeline](#create-a-iac-pipeline)
 - [Module 11: Logging and Monitoring for Security](#module-11-logging-and-monitoring-for-security)
-- [Module 12:](#module-12)
+- [Module 12: Kubernetes Security](#module-12-kubernetes-security)
   - [Kubernetes Security Best Pracises](#kubernetes-security-best-pracises)
   - [EKS Setup](#eks-setup)
-- [Module 13:](#module-13)
+- [Module 13: Kubernetes Access Management with AWS EKS](#module-13-kubernetes-access-management-with-aws-eks)
+  - [Role Based Access Control (RBAC)](#role-based-access-control-rbac)
 - [Module 14:](#module-14)
 - [Module 15:](#module-15)
 - [Module 16:](#module-16)
@@ -43,7 +44,9 @@
 
 ## Setup GiLab CI pipeline, pre-commit script and SAST scanning
 
-**repo: app_juice_shop**
+[Knowledge base](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/03_application_vulnerability_scanning.md?ref_type=heads)
+
+[repo: app_juice_shop](https://gitlab.com/dominikjaro_devsecops_bootcamp/app-juice-shop)
 
 - We use the OWASP open-source app Juice Shop
 - Created a basic GitLab CI pipeline for the app which runs on a GitLab shared runner
@@ -114,7 +117,9 @@ flowchart TD
 
 # Module 4: Vulnerability Management and Remediation
 
-**repo: app_juice_shop**
+[Knowledge base](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/04_vulnerability_management_and_remediation.md?ref_type=heads)
+
+[repo: app_juice_shop](https://gitlab.com/dominikjaro_devsecops_bootcamp/app-juice-shop)
 
 ## Part 1: GitLab CI scan artifacts and Defect Dojo setup
 
@@ -131,7 +136,9 @@ flowchart TD
 
 # Module 5: Vulnarability Scanning for Application Dependencies
 
-**repo: app_juice_shop**
+[Knowledge base](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/05_Vulnerability_scanning_for_application_dependencies.md?ref_type=heads)
+
+[repo: app_juice_shop](https://gitlab.com/dominikjaro_devsecops_bootcamp/app-juice-shop)
 
 **DefectDojo**
 
@@ -202,7 +209,9 @@ flowchart TD
 
 # Module 6: Build a CD Pipeline
 
-**repo: app_juice_shop**
+[Knowledge_base](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/06_build_a_cd_pipeline.md?ref_type=heads)
+
+[repo: app_juice_shop](https://gitlab.com/dominikjaro_devsecops_bootcamp/app-juice-shop)
 
 **AWS**
 
@@ -301,7 +310,9 @@ flowchart TD
 
 # Module 7: Image Scanning - Built Secure Docker Images
 
-**repo: app_juice_shop**
+[Knowledge base](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/07_image_scanning_build_secure_docker_images.md?ref_type=heads)
+
+[repo: app_juice_shop](https://gitlab.com/dominikjaro_devsecops_bootcamp/app-juice-shop)
 
 **AWS**
 
@@ -324,7 +335,9 @@ flowchart TD
 
 # Module 9: Secure Continuous Deployment & DAST
 
-**repo: app_juice_shop**
+[Knowledge base](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/09_secure_continuous_deployment_and_dast.md?ref_type=heads)
+
+[repo: app_juice_shop](https://gitlab.com/dominikjaro_devsecops_bootcamp/app-juice-shop)
 
 **AWS**
 
@@ -391,7 +404,9 @@ flowchart LR
 
 # Module 10: IaC and GitOps for DevSecOps
 
-**repo: infra-automation**
+[Knowledge base](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/10_iac_and_gitops_for_devsecops.md?ref_type=heads)
+
+[repo: infra-automation](https://gitlab.com/dominikjaro_devsecops_bootcamp/infra-automation)
 
 **AWS**
 
@@ -498,9 +513,9 @@ flowchart TD
 
 ---
 
-# Module 12:
+# Module 12: Kubernetes Security
 
-**repo: devsecops-infra-automation-eks**
+[repo: devsecops-infra-automation-eks](https://gitlab.com/dominikjaro_devsecops_bootcamp/devsecops-infra-automation-eks)
 
 **AWS**
 
@@ -516,7 +531,21 @@ flowchart TD
 
 ---
 
-# Module 13: 
+# Module 13: Kubernetes Access Management with AWS EKS
+
+[Knowledge Base](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/13_kubernetes_access_management_with_aws_eks.md?ref_type=heads)
+
+[repo: devsecops-infra-automation-eks](https://gitlab.com/dominikjaro_devsecops_bootcamp/devsecops-infra-automation-eks)
+
+**AWS**
+
+## Role Based Access Control (RBAC)
+
+- We are adding Kubernetes provider and additional K8s and AWS resources. e.g.
+- RBAC roles and bindings
+- Mapping AWS roles to K8s
+- IAM roles
+- The users are created manually in AWS e.g. k8s-admin, k8s--developers
 
 ---
 
