@@ -12,6 +12,11 @@
   - [Self-managed GitLab Runner](#self-managed-gitlab-runner)
 - [Module 7: Image Scanning - Built Secure Docker Images](#module-7-image-scanning---built-secure-docker-images)
   - [Image Scanning](#image-scanning)
+- [Module 8: AWS Cloud Security \& Access Management](#module-8-aws-cloud-security--access-management)
+- [Module 9: Secure Continuous Deployment \& DAST](#module-9-secure-continuous-deployment--dast)
+  - [Configured AWS SSM](#configured-aws-ssm)
+  - [Created IAM Roles \& Short-Lived credentials](#created-iam-roles--short-lived-credentials)
+  - [Dynammic APplication Testing (DAST)](#dynammic-application-testing-dast)
 - [Module 19: Service Mesh with Istio](#module-19-service-mesh-with-istio)
   - [Part1: Deployed Istio Service Mesh components in EKS Cluster via our Terraform pipeline](#part1-deployed-istio-service-mesh-components-in-eks-cluster-via-our-terraform-pipeline)
   - [Part2: Expose microervice app through Istio gateway via secure HTTPS access](#part2-expose-microervice-app-through-istio-gateway-via-secure-https-access)
@@ -45,17 +50,17 @@
 
 ```mermaid
 flowchart TD
-    subgraph Local Development
+    subgraph Local_Development["Local Development"]
         Dev([Developer]) --> Commit[git commit]
         Commit --> PreCommit{Pre-commit Hook\nGitLeaks via Docker}
         PreCommit -- "Secrets Detected" --> Block[Commit Blocked]
         PreCommit -- "Clean" --> Push[Push to GitLab]
     end
 
-    subgraph GitLab CI Pipeline [GitLab Shared Runner]
+    subgraph GitLab_CI_Pipeline["GitLab CI Pipeline (GitLab Shared Runner)"]
         Push --> PipelineStart((Start Pipeline))
 
-        subgraph Stage: Test
+        subgraph Stage_Test["Stage: Test"]
             Cache[(Yarn Cache\nPolicy: pull-push)]
             Gitleaks[GitLeaks Job]
             YarnTest[Yarn Tests]
@@ -66,7 +71,7 @@ flowchart TD
             
         end
 
-        subgraph Stage: Build
+        subgraph Stage_Build["Stage: Build"]
             DockerBuild[Build Docker Image]
             DockerPush[Push Image\nAuth: CI Variables]
             
@@ -295,6 +300,79 @@ flowchart TD
   - Fixed some vulnerabilities, updated version dependencies/subdependencies
   - Learned Docker Security Best Practices
   - Configured automated image security scanning in AWS ECR (most of the cloud platform support it)
+
+---
+
+# Module 8: AWS Cloud Security & Access Management
+
+[AWS Cloud Security & Access Management](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/08_aws_cloud_security_and_access_management.md?ref_type=heads)
+
+---
+
+# Module 9: Secure Continuous Deployment & DAST
+
+**repo: app_juice_shop**
+
+**AWS**
+
+## Configured AWS SSM 
+
+- For best practices we set up `SSM` system manager
+  - Managed access to EC2 instances securely, instead of using direct SSH (we block port 22)
+  - [`aws ssm`](https://docs.aws.amazon.com/cli/latest/reference/ssm/) includes several key features/tools
+  - Installed SSM agent on EC2 instances
+  - Created an IAM role which will be assumed by the EC2 instances for SSM access
+
+## Created IAM Roles & Short-Lived credentials
+
+- Created an IAM role and assigned it to the GitLab runner instance and App server EC2 instance (Allows EC2 instances to call AWS services)
+  - e.g. Permissions to access ECR
+  - Removed the env vars/credentials
+  (everytime the `aws ssm...` command is used a short-lived credential is generated)
+
+## Dynammic APplication Testing (DAST)
+
+- Identifying vulnarabilities in a running application
+- We are using a tool from OWASP for DAST called ZAP
+- Usually DAST testing happens in dev or staging environments before production deployment
+- We changed the pipeline a bit -- added `deploy-test` and `deploy-prod` stages
+  - Once the application has been deployed to the test environment, DAST scans are run
+  - Reports are generated for review
+  - We remediated some vulnerabilities found by ZAP
+  (it is better to run the basline scanning in the release pipeline and full scan in a separate pipeline as it is slower)
+
+```mermaid
+flowchart LR
+    User(["Admin / Developer"])
+
+    subgraph AWS Cloud
+        IAM["AWS IAM & STS<br>(Identity & Token Service)"]
+        SSM["AWS Systems Manager<br>(Control Plane)"]
+        
+        subgraph Private Subnet / VPC
+            subgraph EC2_Instance ["EC2 Instance"]
+                Agent["SSM Agent"]
+            end
+            SG["Security Group<br>Inbound 22: BLOCKED<br>Outbound 443: ALLOW"]
+            SG -.- EC2_Instance
+        end
+    end
+
+    User -- "1. Authenticate" --> IAM
+    IAM -. "2. Returns Short-Lived Token" .-> User
+    User -- "3. Start Session (Uses Token)" --> SSM
+    Agent -- "4. Outbound Polling (HTTPS 443)" --> SSM
+    SSM == "5. Secure Tunnel Established" === Agent
+
+    %% Styling
+    classDef aws fill:#FF9900,stroke:#232F3E,stroke-width:2px,color:white;
+    classDef ec2 fill:#F58536,stroke:#232F3E,stroke-width:2px,color:white;
+    classDef user fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:white;
+    
+    class User user;
+    class IAM,SSM aws;
+    class EC2_Instance,Agent,SG ec2;
+```
 
 ---
 
