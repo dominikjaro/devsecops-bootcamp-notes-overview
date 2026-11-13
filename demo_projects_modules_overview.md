@@ -1,6 +1,7 @@
 
 - [Module 3: Application Vulnarability Scanning](#module-3-application-vulnarability-scanning)
-  - [Part1: Setup GiLab CI pipeline and pre-commit script](#part1-setup-gilab-ci-pipeline-and-pre-commit-script)
+  - [Setup GiLab CI pipeline, pre-commit script and SAST scanning](#setup-gilab-ci-pipeline-pre-commit-script-and-sast-scanning)
+- [Module 4: Vulnerability Management and Remediation](#module-4-vulnerability-management-and-remediation)
 - [Module 19: Service Mesh with Istio](#module-19-service-mesh-with-istio)
   - [Part1: Deployed Istio Service Mesh components in EKS Cluster via our Terraform pipeline](#part1-deployed-istio-service-mesh-components-in-eks-cluster-via-our-terraform-pipeline)
   - [Part2: Expose microervice app through Istio gateway via secure HTTPS access](#part2-expose-microervice-app-through-istio-gateway-via-secure-https-access)
@@ -10,7 +11,7 @@
 
 # Module 3: Application Vulnarability Scanning
 
-## Part1: Setup GiLab CI pipeline and pre-commit script
+## Setup GiLab CI pipeline, pre-commit script and SAST scanning
 
 **repo: app_juice_shop**
 
@@ -86,6 +87,11 @@ flowchart TD
     class Gitleaks,Njsscan,Semgrep security;
     class DockerBuild,DockerPush,Registry build;
 ```
+
+---
+
+# Module 4: Vulnerability Management and Remediation
+
 
 ---
 
