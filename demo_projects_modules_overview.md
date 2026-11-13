@@ -28,7 +28,7 @@
   - [Role Based Access Control (RBAC)](#role-based-access-control-rbac)
 - [Module 14: Secure IaC pipeline for EKS provisioning](#module-14-secure-iac-pipeline-for-eks-provisioning)
 - [Module 15: Bootstrapping clusters with EKS blueprints](#module-15-bootstrapping-clusters-with-eks-blueprints)
-- [Module 16:](#module-16)
+- [Module 16: Application Release pipeline with ArgoCD](#module-16-application-release-pipeline-with-argocd)
 - [Module 17:](#module-17)
 - [Module 18:](#module-18)
 - [Module 19: Service Mesh with Istio](#module-19-service-mesh-with-istio)
@@ -613,7 +613,22 @@ flowchart LR
 - Added some additional autoscaler settings
 
 
-# Module 16:
+# Module 16: Application Release pipeline with ArgoCD
+
+[Knowledge Base](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/16_application_release_pipeline_with_argocd.md?ref_type=heads)
+
+[repo: devsecops-infra-automation-eks](https://gitlab.com/dominikjaro_devsecops_bootcamp/devsecops-infra-automation-eks)
+
+[repo: online-boutique-gitops](https://gitlab.com/dominikjaro_devsecops_bootcamp/online-boutique-gitops)
+
+**AWS**
+
+- Adding ArgoCD for GitOps management using helm charts.
+- Adding ArgoCD secret for authentication in the cluster -- if I port-forward to the argocd-server pod I can use the secret to access the UI.
+- I configure `gitops_url`, `gitops_username`, `gitops_password` for ArgoCD access -- the variables come from GitLab.
+- In the `argo-cd.yaml` I set the source repoURL, path and other policies.
+- The app will sync automatically with the repo.
+- Adding another `deploy_argocd` step in the CD pipeline for updates (I use an image with awscli and kubectl on it).
 
 # Module 17:
 
