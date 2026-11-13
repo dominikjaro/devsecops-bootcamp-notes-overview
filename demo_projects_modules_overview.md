@@ -626,9 +626,60 @@ flowchart LR
 - Adding ArgoCD for GitOps management using helm charts.
 - Adding ArgoCD secret for authentication in the cluster -- if I port-forward to the argocd-server pod I can use the secret to access the UI.
 - I configure `gitops_url`, `gitops_username`, `gitops_password` for ArgoCD access -- the variables come from GitLab.
-- In the `argo-cd.yaml` I set the source repoURL, path and other policies.
+- In the `online-boutique-argo-app.yaml` I set the source repoURL, path and other policies.
+- We are using the Online Boutique demo app from [microservice demos GitHub](https://github.com/googlecloudplatform/microservices-demo).
 - The app will sync automatically with the repo.
 - Adding another `deploy_argocd` step in the CD pipeline for updates (I use an image with awscli and kubectl on it).
+
+```mermaid
+flowchart TD
+    User(["Developer / Admin"])
+
+    subgraph GitLab ["GitLab Ecosystem"]
+        CIVars(["GitLab CI Variables<br>(gitops_url, username, password)"])
+        CIPipe["CD Pipeline<br>Job: deploy_argocd"]
+        GitOpsRepo[("GitOps Repository<br>online-boutique-gitops")]
+    end
+
+    subgraph Amazon EKS Cluster
+        subgraph argocd ["Namespace: argocd"]
+            Helm["Helm Release: argo-cd<br>(v6.4.0)"]
+            ArgoController["ArgoCD Server & Controller"]
+            RepoSecret["K8s Secret: gitops-k8s-repo<br>"]
+            AppCR["ArgoCD Application<br>(online-boutique)"]
+
+            Helm -. "Provisions" .-> ArgoController
+        end
+
+        subgraph default_ns ["Namespace: online-boutique"]
+            Boutique["Google Online Boutique<br>(Microservice Demo App)"]
+        end
+    end
+
+    %% Provisioning & Setup
+    CIVars -. "Injected by Terraform" .-> RepoSecret
+    CIPipe -- "kubectl apply<br>online-boutique-argo-app.yaml" --> AppCR
+    
+    %% User Access
+    User -- "kubectl port-forward<br>(Login via initial admin secret)" --> ArgoController
+
+    %% GitOps Continuous Delivery Flow
+    AppCR -. "Defines Source & Destination" .-> ArgoController
+    ArgoController -- "1. Authenticates using" --> RepoSecret
+    ArgoController -- "2. Watches & Pulls<br>(path: overlays/dev)" --> GitOpsRepo
+    ArgoController == "3. Automated Sync " === Boutique
+
+    %% Styling
+    classDef gitlab fill:#FC6D26,stroke:#E24329,stroke-width:2px,color:white;
+    classDef argocd fill:#EF7B4D,stroke:#C6582D,stroke-width:2px,color:white;
+    classDef k8s fill:#326CE5,stroke:#1F438F,stroke-width:2px,color:white;
+    classDef user fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:white;
+
+    class User user;
+    class CIVars,CIPipe,GitOpsRepo gitlab;
+    class Helm,ArgoController,RepoSecret,AppCR argocd;
+    class Boutique k8s;
+```
 
 # Module 17:
 
