@@ -29,7 +29,7 @@
 - [Module 14: Secure IaC pipeline for EKS provisioning](#module-14-secure-iac-pipeline-for-eks-provisioning)
 - [Module 15: Bootstrapping clusters with EKS blueprints](#module-15-bootstrapping-clusters-with-eks-blueprints)
 - [Module 16: Application Release pipeline with ArgoCD](#module-16-application-release-pipeline-with-argocd)
-- [Module 17:](#module-17)
+- [Module 17: Policy as Code with Open Policy Agent](#module-17-policy-as-code-with-open-policy-agent)
 - [Module 18:](#module-18)
 - [Module 19: Service Mesh with Istio](#module-19-service-mesh-with-istio)
   - [Part1: Deployed Istio Service Mesh components in EKS Cluster via our Terraform pipeline](#part1-deployed-istio-service-mesh-components-in-eks-cluster-via-our-terraform-pipeline)
@@ -681,10 +681,42 @@ flowchart TD
     class Boutique k8s;
 ```
 
-# Module 17:
+# Module 17: Policy as Code with Open Policy Agent
+
+[Knowledge Base](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/17_policy_as_code_with_open_policy_agent.md?ref_type=heads)
+
+[repo: devsecops-infra-automation-eks](https://gitlab.com/dominikjaro_devsecops_bootcamp/devsecops-infra-automation-eks)
+
+[repo: online-boutique-gitops](https://gitlab.com/dominikjaro_devsecops_bootcamp/online-boutique-gitops)
+
+- Adding the gatekeeper helm chart for policy enforcement. (in the repo: online-boutique-gitops you can find the contrainttemplate and the constraint) for enforcing policies.
+- To see the CRDs, I had to add another RBAC role:
+
+```hcl
+rule {
+    api_groups = ["apiextensions.k8s.io"]
+    resources  = ["customresourcedefinitions"]
+    verbs      = ["get", "list", "describe"]
+  }
+```
+
+- In the file platform-argo-app.yaml I define the path to the gitops repo.
+
+- Platform & Policy Enforcement: Open Policy Agent (OPA) Gatekeeper policies enforcing security baselines across the cluster.
+- Cluster security policies are declared under platform/ using OPA Gatekeeper ConstraintTemplates and Constraints:
+  - Disallow Privileged Containers: Blocks any container attempting to run with securityContext.privileged: true to prevent container breakout risks.
+  - Block NodePort Services: Prevents services from using NodePort to avoid exposing them outside the cluster.
+
 
 # Module 18:
 
+[Knowledge Base](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/18_secrets_management_in_kubernetes.md?ref_type=heads)
+
+[repo: devsecops-infra-automation-eks](https://gitlab.com/dominikjaro_devsecops_bootcamp/devsecops-infra-automation-eks)
+
+[repo: online-boutique-gitops](https://gitlab.com/dominikjaro_devsecops_bootcamp/online-boutique-gitops)
+
+**AWS**
 # Module 19: Service Mesh with Istio
 
 ## Part1: Deployed Istio Service Mesh components in EKS Cluster via our Terraform pipeline
