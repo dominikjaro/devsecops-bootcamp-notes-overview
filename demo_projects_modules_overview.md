@@ -26,7 +26,7 @@
   - [EKS Setup](#eks-setup)
 - [Module 13: Kubernetes Access Management with AWS EKS](#module-13-kubernetes-access-management-with-aws-eks)
   - [Role Based Access Control (RBAC)](#role-based-access-control-rbac)
-- [Module 14:](#module-14)
+- [Module 14: Secure IaC pipeline for EKS provisioning](#module-14-secure-iac-pipeline-for-eks-provisioning)
 - [Module 15:](#module-15)
 - [Module 16:](#module-16)
 - [Module 17:](#module-17)
@@ -585,7 +585,19 @@ flowchart LR
 
 ---
 
-# Module 14:
+# Module 14: Secure IaC pipeline for EKS provisioning
+
+[Knowledge Base](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/14_secure_iac_pipeline_for_eks_provisioning.md?ref_type=heads)
+
+[repo: devsecops-infra-automation-eks](https://gitlab.com/dominikjaro_devsecops_bootcamp/devsecops-infra-automation-eks)
+
+**AWS**
+
+- Adding the pipeline for IaC deployment and automation.
+- We initialize terraform and build-plan and apply. There is a cleanup step that can be run manually.
+- The terraform plan file is saved as an artifact, so it can be applied later.
+- We are using a terraform image, however had to install aws cli on it for authentication.
+- In AWS under Access Management I created an Identity Provider for GitLab OIDC, then a Web Identity role, which has the Trust relationship with the Identity Provider, allowing GitLab to assume the role and interact with AWS resources securely.
 
 ---
 
