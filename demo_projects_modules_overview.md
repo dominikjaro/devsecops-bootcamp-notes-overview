@@ -18,6 +18,8 @@
   - [Created IAM Roles \& Short-Lived credentials](#created-iam-roles--short-lived-credentials)
   - [Dynammic APplication Testing (DAST)](#dynammic-application-testing-dast)
 - [Module 10: IaC and GitOps for DevSecOps](#module-10-iac-and-gitops-for-devsecops)
+  - [Create AWS resources via IaC (terraform)](#create-aws-resources-via-iac-terraform)
+  - [Create a IaC pipeline](#create-a-iac-pipeline)
 - [Module 19: Service Mesh with Istio](#module-19-service-mesh-with-istio)
   - [Part1: Deployed Istio Service Mesh components in EKS Cluster via our Terraform pipeline](#part1-deployed-istio-service-mesh-components-in-eks-cluster-via-our-terraform-pipeline)
   - [Part2: Expose microervice app through Istio gateway via secure HTTPS access](#part2-expose-microervice-app-through-istio-gateway-via-secure-https-access)
@@ -378,6 +380,101 @@ flowchart LR
 ---
 
 # Module 10: IaC and GitOps for DevSecOps
+
+**repo: infra-automation**
+
+## Create AWS resources via IaC (terraform)
+
+- We created a `iac-user` which will be used by the pipeline to create the resources.
+  - We had to assign the right IAM permissions.
+- We create all the AWS resources via Terraform code.
+- For the EC2 instances we are passing the `user_data` script to configure them on launch.
+- When in GitLab you set the variable TF_VAR_ for Terraform inputs, e.g., TF_VAR_region -- the pipeline will pick it up automatically.
+- In our IaC we are leveraging modules for reusable components like VPC and EC2.
+
+## Create a IaC pipeline 
+
+- In `.gitlab-ci.yml` we set the terarform image for all the steps
+- We have stages:
+  - `init` to initialize Terraform
+  - `test` which validates the configuration -- PLUS we have trivy scans which check for vulnerabilities
+  - `build` runs `terraform plan -out planfile.tf` and we save it as artifact
+  - `deploy` applies the plan to create resources
+  - We have the `destroy` stage as well which can be run manually and can destroy our resources
+- We configured remote backend for Terraform state storage - leveraging a S3 bucket.
+
+```mermaid
+flowchart TD
+    subgraph GitLab CI Pipeline ["GitLab CI/CD (repo: infra-automation)"]
+        TFVars(["GitLab Variables"]) --> Init
+
+        subgraph Stage: Init
+            Init["terraform init"]
+        end
+
+        subgraph Stage: Test
+            Validate["terraform validate"]
+            Trivy["Trivy IaC Scanner<br>(Vulnerability Check)"]
+        end
+
+        subgraph Stage: Build
+            Plan["terraform plan"]
+        end
+
+        subgraph Stage: Deploy
+            Apply["terraform apply"]
+        end
+
+        subgraph Stage: Cleanup
+            Destroy["terraform destroy<br>(Manual Trigger)"]
+        end
+
+        %% Pipeline Execution Flow
+        Init --> Validate & Trivy
+        Validate & Trivy --> Plan
+        Plan --> Apply
+        Apply -. "Optional / Later" .-> Destroy
+    end
+
+    %% Artifacts
+    Plan -- "Saves artifact" --> Artifact(["planfile.tf"])
+    Artifact -. "Consumed by" .-> Apply
+
+    subgraph AWS Cloud ["AWS Environment"]
+        IAM["IAM User<br>(iac-user credentials)"]
+        S3[("S3 Bucket<br>(Terraform Remote State)")]
+
+        subgraph Provisioned Infrastructure ["Terraform Modules"]
+            VPC["AWS VPC Module"]
+            EC2["EC2 Instances<br>(Bootstrapped via user_data)"]
+        end
+    end
+
+    %% External System Integrations
+    Init -. "Locks & Reads State" .-> S3
+    Apply -. "Updates State" .-> S3
+
+    %% Authentication and Provisioning
+    Apply -- "Authenticates via" --> IAM
+    Destroy -- "Authenticates via" --> IAM
+    
+    IAM -- "Creates Resources" --> VPC
+    IAM -- "Creates Resources" --> EC2
+    
+    Destroy -- "Tears Down" --> VPC
+    Destroy -- "Tears Down" --> EC2
+
+    %% Styling
+    classDef gitlab fill:#FC6D26,stroke:#E24329,stroke-width:2px,color:white;
+    classDef aws fill:#FF9900,stroke:#232F3E,stroke-width:2px,color:white;
+    classDef security fill:#E53935,stroke:#B71C1C,stroke-width:2px,color:white;
+    classDef terraform fill:#5C4EE5,stroke:#4236A8,stroke-width:2px,color:white;
+
+    class TFVars,Artifact gitlab;
+    class Init,Validate,Plan,Apply,Destroy terraform;
+    class Trivy security;
+    class IAM,S3,VPC,EC2 aws;
+```
 
 ---
 
