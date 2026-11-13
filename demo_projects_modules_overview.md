@@ -1,10 +1,10 @@
 
-- [Module 3: Application Vulnarability Scanning](#module-3-application-vulnarability-scanning)
+- [Module 3: Application Vulnerability Scanning](#module-3-application-vulnerability-scanning)
   - [Setup GiLab CI pipeline, pre-commit script and SAST scanning](#setup-gilab-ci-pipeline-pre-commit-script-and-sast-scanning)
 - [Module 4: Vulnerability Management and Remediation](#module-4-vulnerability-management-and-remediation)
   - [Part 1: GitLab CI scan artifacts and Defect Dojo setup](#part-1-gitlab-ci-scan-artifacts-and-defect-dojo-setup)
   - [Part 2: Automate scan uploads to Defect Dojo](#part-2-automate-scan-uploads-to-defect-dojo)
-- [Module 5: Vulnarability Scanning for Application Dependencies](#module-5-vulnarability-scanning-for-application-dependencies)
+- [Module 5: Vulnerability Scanning for Application Dependencies](#module-5-vulnerability-scanning-for-application-dependencies)
   - [Software Composition Analysis (SCA)](#software-composition-analysis-sca)
 - [Module 6: Build a CD Pipeline](#module-6-build-a-cd-pipeline)
   - [Setup AWS ECR \& EC2 server](#setup-aws-ecr--ec2-server)
@@ -16,13 +16,13 @@
 - [Module 9: Secure Continuous Deployment \& DAST](#module-9-secure-continuous-deployment--dast)
   - [Configured AWS SSM](#configured-aws-ssm)
   - [Created IAM Roles \& Short-Lived credentials](#created-iam-roles--short-lived-credentials)
-  - [Dynammic APplication Testing (DAST)](#dynammic-application-testing-dast)
+  - [Dynamic Application Security Testing (DAST)](#dynamic-application-security-testing-dast)
 - [Module 10: IaC and GitOps for DevSecOps](#module-10-iac-and-gitops-for-devsecops)
   - [Create AWS resources via IaC (terraform)](#create-aws-resources-via-iac-terraform)
   - [Create a IaC pipeline](#create-a-iac-pipeline)
 - [Module 11: Logging and Monitoring for Security](#module-11-logging-and-monitoring-for-security)
 - [Module 12: Kubernetes Security](#module-12-kubernetes-security)
-  - [Kubernetes Security Best Pracises](#kubernetes-security-best-pracises)
+  - [Kubernetes Security Best Practices](#kubernetes-security-best-practices)
   - [EKS Setup](#eks-setup)
 - [Module 13: Kubernetes Access Management with AWS EKS](#module-13-kubernetes-access-management-with-aws-eks)
   - [Role Based Access Control (RBAC)](#role-based-access-control-rbac)
@@ -30,17 +30,17 @@
 - [Module 15: Bootstrapping clusters with EKS blueprints](#module-15-bootstrapping-clusters-with-eks-blueprints)
 - [Module 16: Application Release pipeline with ArgoCD](#module-16-application-release-pipeline-with-argocd)
 - [Module 17: Policy as Code with Open Policy Agent](#module-17-policy-as-code-with-open-policy-agent)
-- [Module 18:](#module-18)
+- [Module 18: Secrets Management in Kubernetes](#module-18-secrets-management-in-kubernetes)
 - [Module 19: Service Mesh with Istio](#module-19-service-mesh-with-istio)
   - [Part1: Deployed Istio Service Mesh components in EKS Cluster via our Terraform pipeline](#part1-deployed-istio-service-mesh-components-in-eks-cluster-via-our-terraform-pipeline)
-  - [Part2: Expose microervice app through Istio gateway via secure HTTPS access](#part2-expose-microervice-app-through-istio-gateway-via-secure-https-access)
+  - [Part2: Expose microservice app through Istio gateway via secure HTTPS access](#part2-expose-microservice-app-through-istio-gateway-via-secure-https-access)
   - [Part3: Validated Istio mTLS traffic and configured PeerAuthentication](#part3-validated-istio-mtls-traffic-and-configured-peerauthentication)
   - [Part4: Define Authorization Policies on workloads](#part4-define-authorization-policies-on-workloads)
 - [Module 20: Compliance as Code](#module-20-compliance-as-code)
 
 ---
 
-# Module 3: Application Vulnarability Scanning
+# Module 3: Application Vulnerability Scanning
 
 ## Setup GiLab CI pipeline, pre-commit script and SAST scanning
 
@@ -134,7 +134,7 @@ flowchart TD
 
 ---
 
-# Module 5: Vulnarability Scanning for Application Dependencies
+# Module 5: Vulnerability Scanning for Application Dependencies
 
 [Knowledge base](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/05_Vulnerability_scanning_for_application_dependencies.md?ref_type=heads)
 
@@ -356,7 +356,7 @@ flowchart TD
   - Removed the env vars/credentials
   (everytime the `aws ssm...` command is used a short-lived credential is generated)
 
-## Dynammic APplication Testing (DAST)
+## Dynamic Application Security Testing (DAST)
 
 - Identifying vulnarabilities in a running application
 - We are using a tool from OWASP for DAST called ZAP
@@ -519,7 +519,7 @@ flowchart TD
 
 **AWS**
 
-## Kubernetes Security Best Pracises 
+## Kubernetes Security Best Practices 
 
 [Intro to Kubernetes security](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/12_introduction_to_kubernetes_security.md?ref_type=heads)
 
@@ -708,7 +708,7 @@ rule {
   - Block NodePort Services: Prevents services from using NodePort to avoid exposing them outside the cluster.
 
 
-# Module 18:
+# Module 18: Secrets Management in Kubernetes
 
 [Knowledge Base](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/18_secrets_management_in_kubernetes.md?ref_type=heads)
 
@@ -737,7 +737,7 @@ rule {
   - It means only the objects in that namespace will get the proxy injected.
 - The IaC pipeline will create the necessary resources.
 
-## Part2: Expose microervice app through Istio gateway via secure HTTPS access
+## Part2: Expose microservice app through Istio gateway via secure HTTPS access
 
 **repo: GitOps**
 
