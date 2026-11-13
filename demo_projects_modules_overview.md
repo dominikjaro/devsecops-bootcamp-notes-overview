@@ -9,6 +9,8 @@
   - [Part4: Define Authorization Policies on workloads](#part4-define-authorization-policies-on-workloads)
 - [Module 20: Compliance as Code](#module-20-compliance-as-code)
 
+---
+
 # Module 3: Application Vulnarability Scanning
 
 ## Setup GiLab CI pipeline, pre-commit script and SAST scanning
@@ -61,16 +63,8 @@ flowchart TD
             DockerBuild --> DockerPush
         end
 
-        %% Pipeline triggers Test stage jobs
-        PipelineStart --> Gitleaks
-        PipelineStart --> YarnTest
-        PipelineStart --> Njsscan
-        PipelineStart --> Semgrep
-
-        %% Build stage waits for all Test stage jobs to complete
-        Njsscan --> DockerBuild
-        Semgrep --> DockerBuild
-        Gitleaks --> DockerBuild
+        %% Test jobs run in order before the Build & Release stage
+        PipelineStart --> YarnTest --> Gitleaks --> Njsscan --> Semgrep --> DockerBuild
     end
 
     %% Artifacts and External Systems
