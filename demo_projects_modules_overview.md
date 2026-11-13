@@ -20,6 +20,16 @@
 - [Module 10: IaC and GitOps for DevSecOps](#module-10-iac-and-gitops-for-devsecops)
   - [Create AWS resources via IaC (terraform)](#create-aws-resources-via-iac-terraform)
   - [Create a IaC pipeline](#create-a-iac-pipeline)
+- [Module 11: Logging and Monitoring for Security](#module-11-logging-and-monitoring-for-security)
+- [Module 12:](#module-12)
+  - [Kubernetes Security Best Pracises](#kubernetes-security-best-pracises)
+  - [EKS Setup](#eks-setup)
+- [Module 13:](#module-13)
+- [Module 14:](#module-14)
+- [Module 15:](#module-15)
+- [Module 16:](#module-16)
+- [Module 17:](#module-17)
+- [Module 18:](#module-18)
 - [Module 19: Service Mesh with Istio](#module-19-service-mesh-with-istio)
   - [Part1: Deployed Istio Service Mesh components in EKS Cluster via our Terraform pipeline](#part1-deployed-istio-service-mesh-components-in-eks-cluster-via-our-terraform-pipeline)
   - [Part2: Expose microervice app through Istio gateway via secure HTTPS access](#part2-expose-microervice-app-through-istio-gateway-via-secure-https-access)
@@ -383,6 +393,8 @@ flowchart LR
 
 **repo: infra-automation**
 
+**AWS**
+
 ## Create AWS resources via IaC (terraform)
 
 - We created a `iac-user` which will be used by the pipeline to create the resources.
@@ -477,6 +489,48 @@ flowchart TD
 ```
 
 ---
+
+# Module 11: Logging and Monitoring for Security
+
+**AWS**
+
+[Logging and Monitoring for Security](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/11_logging_and_monitoring_for_security.md?ref_type=heads)
+
+---
+
+# Module 12:
+
+**repo: devsecops-infra-automation-eks**
+
+**AWS**
+
+## Kubernetes Security Best Pracises 
+
+[Intro to Kubernetes security](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/12_introduction_to_kubernetes_security.md?ref_type=heads)
+
+## EKS Setup
+
+- Provisioned EKS cluster via Terraform
+- We just used an AWS admin user for this setip setup
+  - `aws sts get-caller-identity` to check current user
+
+---
+
+# Module 13: 
+
+---
+
+# Module 14:
+
+---
+
+# Module 15:
+
+# Module 16:
+
+# Module 17:
+
+# Module 18:
 
 # Module 19: Service Mesh with Istio
 
