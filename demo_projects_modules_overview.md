@@ -10,6 +10,8 @@
   - [Setup AWS ECR \& EC2 server](#setup-aws-ecr--ec2-server)
   - [Deploy image to EC2](#deploy-image-to-ec2)
   - [Self-managed GitLab Runner](#self-managed-gitlab-runner)
+- [Module 7: Image Scanning - Built Secure Docker Images](#module-7-image-scanning---built-secure-docker-images)
+  - [Image Scanning](#image-scanning)
 - [Module 19: Service Mesh with Istio](#module-19-service-mesh-with-istio)
   - [Part1: Deployed Istio Service Mesh components in EKS Cluster via our Terraform pipeline](#part1-deployed-istio-service-mesh-components-in-eks-cluster-via-our-terraform-pipeline)
   - [Part2: Expose microervice app through Istio gateway via secure HTTPS access](#part2-expose-microervice-app-through-istio-gateway-via-secure-https-access)
@@ -206,7 +208,7 @@ flowchart TD
 - Created an EC2 instance for the runner
   - Need: Docker,awscli and GitLab runner installed
   - In `GitLab` created a project runner and registered it with the EC2 instance (add tags to reference the runner)
-  - The self-managed runner saves as time as it has the docker images cached (although be aware of disk space)
+  - The self-managed runner saves as time as it has the docker images cached (although be aware of disk space, make sure to clean up)
 
 ```mermaid
 flowchart TD
@@ -277,6 +279,23 @@ flowchart TD
     class ECR,TargetEC2,DeployApp aws;
 ```
   
+---
+
+# Module 7: Image Scanning - Built Secure Docker Images
+
+**repo: app_juice_shop**
+
+**AWS**
+
+## Image Scanning
+
+- Added another job in the build stage: Using `trivy` to scan Docker images
+  - We are accessing the image in the ECR and pulling it for scanning with `trivy`
+  - Output the findings and upload the artifacts to DefectDojo (set severity level HIGH,CRITICAL)
+  - Fixed some vulnerabilities, updated version dependencies/subdependencies
+  - Learned Docker Security Best Practices
+  - Configured automated image security scanning in AWS ECR (most of the cloud platform support it)
+
 ---
 
 # Module 19: Service Mesh with Istio
