@@ -17,6 +17,7 @@
   - [Configured AWS SSM](#configured-aws-ssm)
   - [Created IAM Roles \& Short-Lived credentials](#created-iam-roles--short-lived-credentials)
   - [Dynammic APplication Testing (DAST)](#dynammic-application-testing-dast)
+- [Module 10: IaC and GitOps for DevSecOps](#module-10-iac-and-gitops-for-devsecops)
 - [Module 19: Service Mesh with Istio](#module-19-service-mesh-with-istio)
   - [Part1: Deployed Istio Service Mesh components in EKS Cluster via our Terraform pipeline](#part1-deployed-istio-service-mesh-components-in-eks-cluster-via-our-terraform-pipeline)
   - [Part2: Expose microervice app through Istio gateway via secure HTTPS access](#part2-expose-microervice-app-through-istio-gateway-via-secure-https-access)
@@ -373,6 +374,10 @@ flowchart LR
     class IAM,SSM aws;
     class EC2_Instance,Agent,SG ec2;
 ```
+
+---
+
+# Module 10: IaC and GitOps for DevSecOps
 
 ---
 
