@@ -2,6 +2,10 @@
 - [Module 3: Application Vulnarability Scanning](#module-3-application-vulnarability-scanning)
   - [Setup GiLab CI pipeline, pre-commit script and SAST scanning](#setup-gilab-ci-pipeline-pre-commit-script-and-sast-scanning)
 - [Module 4: Vulnerability Management and Remediation](#module-4-vulnerability-management-and-remediation)
+  - [Part 1: GitLab CI scan artifacts and Defect Dojo setup](#part-1-gitlab-ci-scan-artifacts-and-defect-dojo-setup)
+  - [Part 2: Automate scan uploads to Defect Dojo](#part-2-automate-scan-uploads-to-defect-dojo)
+- [Module 5: Vulnarability Scanning for Application Dependencies](#module-5-vulnarability-scanning-for-application-dependencies)
+  - [Software Composition Analysis (SCA)](#software-composition-analysis-sca)
 - [Module 19: Service Mesh with Istio](#module-19-service-mesh-with-istio)
   - [Part1: Deployed Istio Service Mesh components in EKS Cluster via our Terraform pipeline](#part1-deployed-istio-service-mesh-components-in-eks-cluster-via-our-terraform-pipeline)
   - [Part2: Expose microervice app through Istio gateway via secure HTTPS access](#part2-expose-microervice-app-through-istio-gateway-via-secure-https-access)
@@ -56,7 +60,7 @@ flowchart TD
             
         end
 
-        subgraph Stage: Build & Release
+        subgraph Stage: Build
             DockerBuild[Build Docker Image]
             DockerPush[Push Image\nAuth: CI Variables]
             
@@ -86,6 +90,87 @@ flowchart TD
 
 # Module 4: Vulnerability Management and Remediation
 
+**repo: app_juice_shop**
+
+## Part 1: GitLab CI scan artifacts and Defect Dojo setup
+
+- In the GitLab CI output scan files and store them as artifacts
+- Setup DefectDojo producttype > product ...etc for scan tracking
+
+## Part 2: Automate scan uploads to Defect Dojo
+
+- We created a python script `upload-reports.py` to send scan files to Defect Dojo.
+- The script is called in the pipeline after the scans and before the build stage.
+- Went through the findings and fixed some security issues.
+
+---
+
+# Module 5: Vulnarability Scanning for Application Dependencies
+
+**repo: app_juice_shop**
+
+## Software Composition Analysis (SCA)
+
+- We added another job and tool into the test stage for dependency scanning.
+- Retire.js for JS dependencies.
+- Now we built a pipeline for static application testing
+
+```mermaid
+flowchart TD
+    subgraph Local Development
+        Dev([Developer]) --> Commit[git commit]
+        Commit --> PreCommit{Pre-commit Hook\nGitLeaks via Docker}
+        PreCommit -- "Secrets Detected" --> Block[Commit Blocked]
+        PreCommit -- "Clean" --> Push[Push to GitLab]
+    end
+
+    subgraph GitLab CI Pipeline [GitLab Shared Runner]
+        Push --> PipelineStart((Start Pipeline))
+
+        subgraph Stage: Cache
+          YarnCache[create_cache]
+        end
+
+        subgraph Stage: Test
+            Gitleaks[GitLeaks Job]
+            YarnTest[Yarn Tests]
+            Njsscan[njsscan SAST]
+            Semgrep[Semgrep SAST]
+          Retirejs[Retire.js SCA]
+        end
+
+        subgraph Stage: Upload Reports
+          UploadReports[Python Script\nUpload Scan Reports]
+        end
+
+        subgraph Stage: Build
+            DockerBuild[Build Docker Image]
+            DockerPush[Push Image\nAuth: CI Variables]
+            
+            DockerBuild --> DockerPush
+        end
+
+        %% Test jobs run before reports are uploaded, then the Build stage
+        PipelineStart --> YarnCache --> YarnTest --> Gitleaks --> Njsscan --> Semgrep --> Retirejs --> UploadReports --> DockerBuild
+        YarnCache -. "Download cache" .-> YarnTest
+        YarnCache -. "Download cache" .-> Retirejs
+    end
+
+    %% Artifacts and External Systems
+      UploadReports -->|Scan artifacts| DefectDojo[(DefectDojo)]
+    DockerPush --> Registry[(Private Docker Registry)]
+
+    %% Styling
+    classDef gitlab fill:#FC6D26,stroke:#E24329,stroke-width:2px,color:white;
+    classDef local fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:white;
+    classDef security fill:#E53935,stroke:#B71C1C,stroke-width:2px,color:white;
+    classDef build fill:#1976D2,stroke:#0D47A1,stroke-width:2px,color:white;
+
+    class Push,PipelineStart gitlab;
+    class Dev,Commit,PreCommit,Block local;
+    class Gitleaks,YarnTest,Njsscan,Semgrep,Retirejs security;
+    class DockerBuild,DockerPush,Registry build;
+```
 
 ---
 
