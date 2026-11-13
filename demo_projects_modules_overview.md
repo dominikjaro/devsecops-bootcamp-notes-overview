@@ -547,6 +547,42 @@ flowchart TD
 - IAM roles
 - The users are created manually in AWS e.g. k8s-admin, k8s--developers
 
+```mermaid
+flowchart LR
+    subgraph AWS IAM Layer
+        AdminUser(["IAM User<br>(var.user_for_admin_role)"]) -->|sts:AssumeRole| AdminRole["IAM Role:<br>external-admin"]
+        DevUser(["IAM User<br>(var.user_for_dev_role)"]) -->|sts:AssumeRole| DevRole["IAM Role:<br>external-developer"]
+    end
+
+    subgraph Amazon EKS Cluster
+        subgraph Kubernetes Identity
+            AdminRole -. "AWS Auth Mapping" .-> K8sGroup(["K8s Group:<br>restricted-admins"])
+            DevRole -. "AWS Auth Mapping" .-> K8sUser(["K8s User:<br>developer"])
+        end
+
+        subgraph Kubernetes RBAC Bindings
+            K8sGroup -->|"ClusterRoleBinding:<br>restricted-admin-binding"| CR["ClusterRole:<br>restricted-admin"]
+            K8sUser -->|"RoleBinding:<br>namespace-viewer"| R["Role:<br>namespace-viewer"]
+        end
+
+        subgraph Allowed Access Scope
+            CR --> ClusterWide[("All Core Resources<br>Cluster-Wide")]
+            R --> NS[("Namespace:<br>online-boutique")]
+        end
+    end
+
+    %% Styling
+    classDef aws fill:#FF9900,stroke:#232F3E,stroke-width:2px,color:white;
+    classDef k8sIdentity fill:#F53B75,stroke:#A11C47,stroke-width:2px,color:white;
+    classDef k8sRbac fill:#326CE5,stroke:#1F438F,stroke-width:2px,color:white;
+    classDef k8sScope fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:white;
+
+    class AdminUser,DevUser,AdminRole,DevRole aws;
+    class K8sGroup,K8sUser k8sIdentity;
+    class CR,R k8sRbac;
+    class ClusterWide,NS k8sScope;
+````
+
 ---
 
 # Module 14:
