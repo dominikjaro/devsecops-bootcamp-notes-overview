@@ -27,7 +27,7 @@
 - [Module 13: Kubernetes Access Management with AWS EKS](#module-13-kubernetes-access-management-with-aws-eks)
   - [Role Based Access Control (RBAC)](#role-based-access-control-rbac)
 - [Module 14: Secure IaC pipeline for EKS provisioning](#module-14-secure-iac-pipeline-for-eks-provisioning)
-- [Module 15:](#module-15)
+- [Module 15: Bootstrapping clusters with EKS blueprints](#module-15-bootstrapping-clusters-with-eks-blueprints)
 - [Module 16:](#module-16)
 - [Module 17:](#module-17)
 - [Module 18:](#module-18)
@@ -601,7 +601,17 @@ flowchart LR
 
 ---
 
-# Module 15:
+# Module 15: Bootstrapping clusters with EKS blueprints
+
+[Knowledge Base](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/15_bootstrapping_clusters_with_eks_blueprints.md?ref_type=heads)
+
+[repo: devsecops-infra-automation-eks](https://gitlab.com/dominikjaro_devsecops_bootcamp/devsecops-infra-automation-eks)
+
+**AWS**
+
+- Added Helm provider and add_ons for e.g. `aws_load_balancer_controller`, `metrics-server`, `cluster_autoscaler`
+- Added some additional autoscaler settings
+
 
 # Module 16:
 
