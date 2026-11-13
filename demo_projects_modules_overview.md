@@ -6,6 +6,10 @@
   - [Part 2: Automate scan uploads to Defect Dojo](#part-2-automate-scan-uploads-to-defect-dojo)
 - [Module 5: Vulnarability Scanning for Application Dependencies](#module-5-vulnarability-scanning-for-application-dependencies)
   - [Software Composition Analysis (SCA)](#software-composition-analysis-sca)
+- [Module 6: Build a CD Pipeline](#module-6-build-a-cd-pipeline)
+  - [Setup AWS ECR \& EC2 server](#setup-aws-ecr--ec2-server)
+  - [Deploy image to EC2](#deploy-image-to-ec2)
+  - [Self-managed GitLab Runner](#self-managed-gitlab-runner)
 - [Module 19: Service Mesh with Istio](#module-19-service-mesh-with-istio)
   - [Part1: Deployed Istio Service Mesh components in EKS Cluster via our Terraform pipeline](#part1-deployed-istio-service-mesh-components-in-eks-cluster-via-our-terraform-pipeline)
   - [Part2: Expose microervice app through Istio gateway via secure HTTPS access](#part2-expose-microervice-app-through-istio-gateway-via-secure-https-access)
@@ -109,6 +113,8 @@ flowchart TD
 
 **repo: app_juice_shop**
 
+**DefectDojo**
+
 ## Software Composition Analysis (SCA)
 
 - We added another job and tool into the test stage for dependency scanning.
@@ -172,6 +178,105 @@ flowchart TD
     class DockerBuild,DockerPush,Registry build;
 ```
 
+---
+
+# Module 6: Build a CD Pipeline
+
+**repo: app_juice_shop**
+
+**AWS**
+
+## Setup AWS ECR & EC2 server
+
+- Created repository and configured access
+- In the build stage now we are building the image and pushing it to ECR (instead of DockerHub)
+- Setup EC2 server for deployment
+  - To configure the EC2 server we need to install docker, awscli and add ubuntu user to docker group
+    - `sudo apt install docker.io -y`
+    - `sudo usermod -aG docker ubuntu`
+    - `sudo apt install awscli -y`
+
+## Deploy image to EC2
+
+- Stage: `deploy` -- added another stage which pulls the image from ECR and runs it on EC2
+  - Using `ssh` to connect and run commands on EC2
+
+## Self-managed GitLab Runner
+
+- Created an EC2 instance for the runner
+  - Need: Docker,awscli and GitLab runner installed
+  - In `GitLab` created a project runner and registered it with the EC2 instance (add tags to reference the runner)
+  - The self-managed runner saves as time as it has the docker images cached (although be aware of disk space)
+
+```mermaid
+flowchart TD
+    subgraph Local Development
+        Dev([Developer]) --> Commit[git commit]
+        Commit --> PreCommit{Pre-commit Hook\nGitLeaks via Docker}
+        PreCommit -- "Secrets Detected" --> Block[Commit Blocked]
+        PreCommit -- "Clean" --> Push[Push to GitLab]
+    end
+
+    subgraph GitLab CI Pipeline [Self-Managed GitLab Runner on AWS EC2]
+        Push --> PipelineStart((Start Pipeline))
+
+        subgraph Stage: Cache
+          YarnCache[create_cache]
+        end
+
+        subgraph Stage: Test
+            Gitleaks[GitLeaks Job]
+            YarnTest[Yarn Tests]
+            Njsscan[njsscan SAST]
+            Semgrep[Semgrep SAST]
+            Retirejs[Retire.js SCA]
+        end
+
+        subgraph Stage: Upload Reports
+          UploadReports[Python Script\nUpload Scan Reports]
+        end
+
+        subgraph Stage: Build
+            DockerBuild[Build Docker Image]
+            DockerPush[Push Image\nAuth: AWS IAM/Credentials]
+            
+            DockerBuild --> DockerPush
+        end
+
+        subgraph Stage: Deploy
+            DeployApp[Deploy to EC2 Instance]
+        end
+
+        %% Execution flow
+        PipelineStart --> YarnCache --> YarnTest --> Gitleaks --> Njsscan --> Semgrep --> Retirejs --> UploadReports --> DockerBuild
+        DockerPush --> DeployApp
+        
+        YarnCache -. "Download cache" .-> YarnTest
+        YarnCache -. "Download cache" .-> Retirejs
+    end
+
+    %% Artifacts and External Systems
+    UploadReports -->|Scan artifacts| DefectDojo[(DefectDojo)]
+    
+    %% AWS Architecture Integration
+    DockerPush --> ECR[(AWS ECR\nElastic Container Registry)]
+    ECR -. "Pull Image" .-> TargetEC2[(Application EC2 Instance)]
+    DeployApp -- "Triggers pull & run" --> TargetEC2
+
+    %% Styling
+    classDef gitlab fill:#FC6D26,stroke:#E24329,stroke-width:2px,color:white;
+    classDef local fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:white;
+    classDef security fill:#E53935,stroke:#B71C1C,stroke-width:2px,color:white;
+    classDef build fill:#1976D2,stroke:#0D47A1,stroke-width:2px,color:white;
+    classDef aws fill:#FF9900,stroke:#232F3E,stroke-width:2px,color:white;
+
+    class Push,PipelineStart gitlab;
+    class Dev,Commit,PreCommit,Block local;
+    class Gitleaks,YarnTest,Njsscan,Semgrep,Retirejs security;
+    class DockerBuild,DockerPush build;
+    class ECR,TargetEC2,DeployApp aws;
+```
+  
 ---
 
 # Module 19: Service Mesh with Istio
