@@ -823,7 +823,7 @@ flowchart TD
 
 # Module 20: Compliance as Code
 
-[Knowledge_Base]()
+[Knowledge_Base](https://gitlab.com/dominikjaro_devsecops_bootcamp/notes_overview/-/blob/main/chapters_notes/20_compliance_as_code.md?ref_type=heads)
 
 **AWS**
 
