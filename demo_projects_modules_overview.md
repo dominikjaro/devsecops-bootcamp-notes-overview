@@ -38,6 +38,7 @@
   - [Part4: Define Authorization Policies on workloads](#part4-define-authorization-policies-on-workloads)
 - [Module 20: Compliance as Code](#module-20-compliance-as-code)
   - [Our AWS Config rules:](#our-aws-config-rules)
+- [END:Demo Full Workflow](#enddemo-full-workflow)
 
 ---
 
@@ -852,7 +853,13 @@ We created a custom policy called ConfigAutoRemediation with the necessary permi
 
 ![Config Policy](aws_configautoremediationrole_policy.png)
 
+The screenshot below shows 2 rules are compliant. The EKS rules are not defines as I don't have a cluster at the moment.
+
+![AWS Config Compliance](aws_config_compliance.png)
+
 ---
+
+# END:Demo Full Workflow
 
 ```mermaid
 flowchart TD
