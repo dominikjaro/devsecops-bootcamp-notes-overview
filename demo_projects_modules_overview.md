@@ -37,6 +37,7 @@
   - [Part3: Validated Istio mTLS traffic and configured PeerAuthentication](#part3-validated-istio-mtls-traffic-and-configured-peerauthentication)
   - [Part4: Define Authorization Policies on workloads](#part4-define-authorization-policies-on-workloads)
 - [Module 20: Compliance as Code](#module-20-compliance-as-code)
+  - [Our AWS Config rules:](#our-aws-config-rules)
 
 ---
 
@@ -821,3 +822,118 @@ flowchart TD
 ---
 
 # Module 20: Compliance as Code
+
+[Knowledge_Base]()
+
+**AWS**
+
+## Our AWS Config rules:
+
+- We are restricting `ssh`access to our servers - with this rule we are monitoring unauthorized access attempts.
+- Ensure CloudTrail is enabled.
+- `eks-clusteroldest-supported-version`
+- `eks-cluster-logging-enabled` -- we need this for the above role as AWS Config checks the EKS clusters via cluster logging
+
+In my config I created the config for daily checks(jus because price is lower).
+
+![AWS Config](aws_config.png)
+
+Remediation can be automated with `aws ssm` config rules.
+
+We created 2 automated remediation for our AWS configs.
+
+1. restricted ssh access
+2. CloudTrail enabled
+
+- AWS Config detects non-compliant resources then --> it delegates remediation to SSM (runbook).
+(for this We created an IAM role e.g. with permissions to change security group rules --  this IAM role is assumed by SSM)
+
+We created a custom policy called ConfigAutoRemediation with the necessary permissions for SSM to remediate our resources **restricted ssh access** and **CloudTrail**.
+
+![Config Policy](aws_configautoremediationrole_policy.png)
+
+---
+
+```mermaid
+flowchart TD
+    PublicUser([End User / Client])
+
+    subgraph DevPhase ["1. Local Development (Shift-Left)"]
+        Dev([Developer]) -->|Pre-commit Hook<br>GitLeaks| GitPush[Push Code]
+    end
+
+    subgraph GitLab ["2. GitLab Version Control & CI/CD"]
+        GitPush --> AppRepo[Application Repo]
+        GitPush --> GitOpsRepo[GitOps Repo<br>K8s Manifests]
+        
+        subgraph Pipeline ["Continuous Integration Pipeline"]
+            SecScans["Security Scans<br>(njsscan, Semgrep, Retire.js, Trivy)"]
+            BuildPush["Build Image & Push"]
+            AppRepo --> SecScans --> BuildPush
+        end
+    end
+
+    subgraph SecOps ["3. Vulnerability Management"]
+        DefectDojo[("DefectDojo<br>(Vulnerability Dashboard)")]
+        SecScans -. "Uploads Artifacts" .-> DefectDojo
+    end
+
+    subgraph AWS ["4. AWS Cloud Infrastructure"]
+        ECR[("AWS ECR<br>(Container Registry)")]
+        SecretsManager[("AWS Secrets Manager")]
+        
+        BuildPush -- "Authenticates & Pushes Image" --> ECR
+        
+        subgraph EKS ["5. Amazon EKS Cluster"]
+            
+            subgraph ArgoCD ["Namespace: argocd"]
+                Argo["ArgoCD Controller<br>(GitOps)"]
+            end
+
+            subgraph SecurityOps ["Cluster Operations & Policy"]
+                OPA["OPA Gatekeeper<br>(Policy as Code)"]
+                ES["External Secrets Operator"]
+            end
+
+            subgraph Mesh ["Namespace: istio-system"]
+                IGW["Istio Ingress Gateway"]
+                Istiod["Istiod Control Plane"]
+            end
+
+            subgraph Workload ["Namespace: online-boutique"]
+                AppPod["Frontend Application"]
+                Sidecar["Envoy Proxy Sidecar"]
+                AppPod -.- Sidecar
+            end
+        end
+    end
+
+    %% GitOps & Provisioning Flow
+    GitOpsRepo -. "1. Monitored by" .-> Argo
+    Argo -. "2. Pulls Image" .-> ECR
+    Argo == "3. Automated Sync" === Workload
+    
+    %% Security & Secrets Flow
+    ES -. "Fetches credentials" .-> SecretsManager
+    ES -- "Injects TLS certs" --> Mesh
+    OPA -. "Enforces security context" .-> Workload
+
+    %% Traffic Flow
+    PublicUser -- "HTTPS (Port 443)" --> IGW
+    IGW -- "VirtualService<br>STRICT mTLS" --> Sidecar
+
+    %% Styling
+    classDef gitlab fill:#FC6D26,stroke:#E24329,stroke-width:2px,color:white;
+    classDef aws fill:#FF9900,stroke:#232F3E,stroke-width:2px,color:white;
+    classDef sec fill:#E53935,stroke:#B71C1C,stroke-width:2px,color:white;
+    classDef k8s fill:#326CE5,stroke:#1F438F,stroke-width:2px,color:white;
+    classDef mesh fill:#466BB0,stroke:#2b426d,stroke-width:2px,color:white;
+    classDef user fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:white;
+    
+    class Dev,PublicUser user;
+    class AppRepo,GitOpsRepo,Pipeline,BuildPush gitlab;
+    class ECR,SecretsManager aws;
+    class SecScans,DefectDojo,OPA sec;
+    class Argo,ES,AppPod k8s;
+    class IGW,Istiod,Sidecar mesh;
+```
